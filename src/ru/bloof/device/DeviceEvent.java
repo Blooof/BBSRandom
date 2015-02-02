@@ -1,6 +1,6 @@
 package ru.bloof.device;
 
-import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 
 /**
  * @author <a href="mailto:blloof@gmail.com">Oleg Larionov</a>
@@ -21,8 +21,23 @@ public class DeviceEvent {
         this.value = value;
     }
 
-    public DeviceEvent(ByteBuffer bb) {
-        this(bb.getLong(), bb.getLong(), bb.getShort(), bb.getShort(), bb.getInt());
+    public DeviceEvent(ShortBuffer sb) {
+        short a, b, c, d;
+        a = sb.get();
+        b = sb.get();
+        c = sb.get();
+        d = sb.get();
+        timeSec = ((long) d << 48) | ((long) c << 32) | ((long) b << 16) | a;
+        a = sb.get();
+        b = sb.get();
+        c = sb.get();
+        d = sb.get();
+        timeUsec = ((long) d << 48) | ((long) c << 32) | ((long) b << 16) | a;
+        type = sb.get();
+        code = sb.get();
+        a = sb.get();
+        b = sb.get();
+        value = ((int) b << 16) | a;
     }
 
     public long getTimeSec() {
@@ -43,5 +58,16 @@ public class DeviceEvent {
 
     public int getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "timeSec=" + timeSec +
+                ", timeUsec=" + timeUsec +
+                ", type=" + type +
+                ", code=" + code +
+                ", value=" + value +
+                '}';
     }
 }

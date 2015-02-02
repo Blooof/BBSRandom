@@ -4,6 +4,8 @@ import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
+import ru.bloof.prng.BBSRandom;
+import ru.bloof.prng.DeviceRandom;
 
 import java.io.PrintWriter;
 import java.util.Random;
@@ -13,17 +15,11 @@ import java.util.Random;
  */
 public class NistTests {
     public static final int BITS_FOR_TEST = 6272;
+    public static final int BITS_FOR_MATRIX_TEST = 38912;
     public static final int BITS_IN_BYTE = 8;
 
     public static void main(String[] args) {
-        Random rnd = new Random() {
-            MersenneTwister twister = new MersenneTwister();
-
-            @Override
-            public void nextBytes(byte[] data) {
-                twister.nextBytes(data);
-            }
-        };
+        Random rnd = createBBSRandom();
         byte[] data = new byte[BITS_FOR_TEST / BITS_IN_BYTE];
         rnd.nextBytes(data);
         try (PrintWriter pw = new PrintWriter(System.out)) {
@@ -32,7 +28,7 @@ public class NistTests {
             runsTest(data, pw);
             onesLongestRun(data, pw);
 
-            data = new byte[38912 / BITS_IN_BYTE];
+            data = new byte[BITS_FOR_MATRIX_TEST / BITS_IN_BYTE];
             rnd.nextBytes(data);
             binaryMatrixRankTest(data, pw);
         }
@@ -295,5 +291,22 @@ public class NistTests {
     public static boolean testBit(byte value, int bit) {
         int intValue = value < 0 ? 256 + value : value;
         return ((intValue >> bit) & 1) == 1;
+    }
+
+    @SuppressWarnings("unused")
+    private static Random createMersenneTwisterRandom() {
+        return new Random() {
+            MersenneTwister twister = new MersenneTwister();
+
+            @Override
+            public void nextBytes(byte[] data) {
+                twister.nextBytes(data);
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    private static BBSRandom createBBSRandom() {
+        return new BBSRandom(64, new DeviceRandom());
     }
 }

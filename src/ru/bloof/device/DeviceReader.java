@@ -23,13 +23,14 @@ public class DeviceReader implements Runnable {
         byte[] eventData = new byte[EVENT_SIZE];
         try (InputStream input = new BufferedInputStream(new FileInputStream(file))) {
             while (!Thread.interrupted()) {
-                if (input.read(eventData) != eventData.length) {
+                while (input.read(eventData) != EVENT_SIZE) {
                     Thread.sleep(POLL_PERIOD);
-                    continue;
                 }
                 ByteBuffer bb = ByteBuffer.wrap(eventData);
                 bb.order(ByteOrder.LITTLE_ENDIAN);
-                listener.onEvent(new DeviceEvent(bb));
+                DeviceEvent event = new DeviceEvent(bb.asShortBuffer());
+                listener.onEvent(event);
+                System.err.println(event);
             }
         } catch (IOException e) {
             e.printStackTrace();
