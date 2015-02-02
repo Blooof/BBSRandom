@@ -17,7 +17,9 @@ public class BBSRandom extends Random {
         try {
             n = generateN(bits, initRnd);
             byte[] seed = new byte[bits / 8];
+            System.err.println("Generating seed");
             initRnd.nextBytes(seed);
+            System.err.println("Seed found");
             setSeed(seed);
         } finally {
             if (initRnd instanceof DeviceRandom) {
@@ -28,10 +30,14 @@ public class BBSRandom extends Random {
 
     private static BigInteger generateN(int bits, Random rand) {
         BigInteger p = getPrime(bits / 2, rand);
+        System.err.println("Build first prime");
         BigInteger q = getPrime(bits / 2, rand);
+        System.err.println("Build second prime");
         while (p.equals(q)) {
+            System.err.println("Rebuilding second prime");
             q = getPrime(bits, rand);
         }
+        System.err.println("Primes found");
         return p.multiply(q);
     }
 

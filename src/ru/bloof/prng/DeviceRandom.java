@@ -14,19 +14,13 @@ public class DeviceRandom extends Random {
     private final BaseDeviceListener listener = new BaseDeviceListener() {
         @Override
         public void onEvent(DeviceEvent event) {
-            if (event.getType() != DeviceEvent.EV_KEY) {
-                return;
-            }
-            bytes.offer((byte) (event.getTimeUsec() & 0xF));
+            bytes.offer((byte) (event.getValue() & 0xFF));
+            bytes.offer((byte) ((event.getValue() >> 8) & 0xFF));
         }
     };
 
     private byte getByte() throws InterruptedException {
-        byte result = 0;
-        for (int i = 0; i < 2; i++) {
-            result |= bytes.take() << (4 * i);
-        }
-        return result;
+        return bytes.take();
     }
 
     @Override

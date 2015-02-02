@@ -307,6 +307,6 @@ public class NistTests {
 
     @SuppressWarnings("unused")
     private static BBSRandom createBBSRandom() {
-        return new BBSRandom(64, new DeviceRandom());
+        return new BBSRandom(128, new DeviceRandom());
     }
 }
