@@ -13,15 +13,16 @@ public class BBSRandom extends Random {
     private final BigInteger n;
     private BigInteger state;
 
-    public BBSRandom(int bits) {
-        DeviceRandom deviceRandom = new DeviceRandom();
+    public BBSRandom(int bits, Random initRnd) {
         try {
-            n = generateN(bits, deviceRandom);
+            n = generateN(bits, initRnd);
             byte[] seed = new byte[bits / 8];
-            deviceRandom.nextBytes(seed);
+            initRnd.nextBytes(seed);
             setSeed(seed);
         } finally {
-            deviceRandom.close();
+            if (initRnd instanceof DeviceRandom) {
+                ((DeviceRandom) initRnd).close();
+            }
         }
     }
 
