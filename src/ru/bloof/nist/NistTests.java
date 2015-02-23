@@ -35,17 +35,22 @@ public class NistTests {
     }
 
     public static void frequencyTest(byte[] bytes, PrintWriter out) {
+        out.println("Frequency test:");
         int sum = 0;
         for (byte b : bytes) {
             for (int j = 0; j < 8; j++) {
                 sum += testBit(b, j) ? 1 : -1;
             }
         }
+        out.println("Sum: " + sum);
         double p = Erf.erfc(FastMath.abs(sum) / FastMath.sqrt(bytes.length * BITS_IN_BYTE * 2));
+        out.println("p-value: " + p);
         out.println(p > 0.01 ? "Frequency test passed" : "Frequency test failed");
+        out.println("-------------------");
     }
 
     public static void runsTest(byte[] bytes, PrintWriter out) {
+        out.println("Runs test: ");
         int ones = 0;
         for (byte b : bytes) {
             for (int j = 0; j < BITS_IN_BYTE; j++) {
@@ -54,8 +59,11 @@ public class NistTests {
                 }
             }
         }
+        out.println("Total ones: " + ones);
         int bits = bytes.length * BITS_IN_BYTE;
         double pi = 1. * ones / bits;
+        out.println("Pi: " + pi);
+        out.println("Testing pi - 1/2 < 2/sqrt(n): " + (pi - 0.5) + " and " + 2 / FastMath.sqrt(bits));
         if (pi - 0.5 >= 2 / FastMath.sqrt(bits)) {
             out.println("Runs test failed");
             return;
@@ -72,18 +80,23 @@ public class NistTests {
                 sign = curSign;
             }
         }
+        out.println("Sign changes: " + v_n);
         double p = Erf.erfc(FastMath.abs(v_n - 2 * bits * pi * (1 - pi)) / (2 * FastMath.sqrt(2 * bits) * pi * (1 - pi)));
+        out.println("p-value: " + p);
         out.println(p >= 0.1 ? "Runs test passed" : "Runs test failed");
+        out.println("-------------------");
     }
 
     // В блоке 128 бит.
     public static void onesLongestRun(byte[] bytes, PrintWriter out) {
+        out.println("Ones Longest Run Test: ");
         int bitsInBlock = 128;
         int bits = bytes.length * BITS_IN_BYTE;
         int blocksCount = bits / bitsInBlock;
         if (bits % bitsInBlock != 0) {
             blocksCount++;
         }
+        out.println("Bits in block " + bitsInBlock + ", blocks count " + blocksCount);
         int[] maxRun = new int[blocksCount];
         int block = -1, run = 0;
         for (int i = 0; i < bits; i++) {
@@ -133,20 +146,30 @@ public class NistTests {
             }
             v[index]++;
         }
+        out.println("Stats v_i: ");
+        for (int i = 0; i < v.length; i++) {
+            out.print(i + ":" + v[i] + " ");
+        }
+        out.println();
         double[] pi = {0.1174, 0.2430, 0.2493, 0.1752, 0.1027, 0.1124};
         for (int i = 0; i <= k; i++) {
             chi_sq += FastMath.pow(v[i] - blocksCount * pi[i], 2) / (blocksCount * pi[i]);
         }
+        out.println("\\chi^2: " + chi_sq);
         double p = Gamma.regularizedGammaQ(k / 2., chi_sq / 2);
+        out.println("p-value: " + p);
         out.println(p > 0.01 ? "OnesLongestRun test passed" : "OnesLongestRun test failed");
+        out.println("-------------------");
     }
 
     // M = Q = 32
     public static void binaryMatrixRankTest(byte[] bytes, PrintWriter out) {
+        out.println("Binary Matrix Rank Test");
         int M, Q = M = 32;
         int matrixSize = M * Q;
         int bits = bytes.length * BITS_IN_BYTE;
         int matricesCount = bits / matrixSize;
+        out.println("M=Q=32, matrices count " + matricesCount);
         int F_M = 0, F_M1 = 0;
         for (int i = 0; i < matricesCount; i++) {
             int[][] data = new int[M][Q];
@@ -163,14 +186,18 @@ public class NistTests {
                 F_M1++;
             }
         }
+        out.println("F_M: " + F_M + ", F_M-1: " + F_M1 + ", N-F_M-F_M-1: " + (matricesCount - F_M - F_M1));
 
         double[] pi = new double[]{0.2888, 0.5776, 0.1336};
         double chi_sq = 0;
         chi_sq += FastMath.pow(F_M - pi[0] * matricesCount, 2) / (pi[0] * matricesCount);
         chi_sq += FastMath.pow(F_M1 - pi[1] * matricesCount, 2) / (pi[1] * matricesCount);
         chi_sq += FastMath.pow(matricesCount - F_M - F_M1 - pi[2] * matricesCount, 2) / (pi[2] * matricesCount);
+        out.println("\\chi^2: " + chi_sq);
         double p = Gamma.regularizedGammaQ(1, chi_sq / 2);
+        out.println("p-value: " + p);
         out.println(p > 0.01 ? "BinaryMatrixRank test passed" : "BinaryMatrixRank test failed");
+        out.println("-------------------");
     }
 
     /**
@@ -268,9 +295,12 @@ public class NistTests {
     }
 
     public static void frequencyBlockTest(byte[] bytes, int bitsInBlock, PrintWriter out) {
+        out.println("Frequency block test: ");
         int blocksCount = bytes.length * BITS_IN_BYTE / bitsInBlock;
         int bitsInBlocks = bitsInBlock * blocksCount;
         int[] ones = new int[blocksCount];
+        out.println("Blocks count: " + blocksCount + ", bits in block: " + bitsInBlock +
+                ", bits discarded: " + (bytes.length * BITS_IN_BYTE - bitsInBlocks));
         for (int i = 0; i < bitsInBlocks; i++) {
             int byteNumber = i / BITS_IN_BYTE;
             int bitInByte = i % BITS_IN_BYTE;
@@ -279,13 +309,22 @@ public class NistTests {
                 ones[blockNumber]++;
             }
         }
+        out.println("Ones in blocks:");
+        for (int i = 0; i < ones.length; i++) {
+            out.print(i + ":" + ones[i] + " ");
+        }
+        out.println();
+        ;
         double chi_sq = 0;
         for (int i = 0; i < blocksCount; i++) {
             chi_sq += FastMath.pow(1. * ones[i] / bitsInBlock - 0.5, 2);
         }
         chi_sq *= 4 * bitsInBlock;
+        out.print("\\chi^2: " + chi_sq);
         double p = Gamma.regularizedGammaQ(blocksCount / 2., chi_sq / 2);
+        out.println("p-value: " + p);
         out.println(p > 0.01 ? "Frequency block test passed" : "Frequency block test failed");
+        out.println("-------------------");
     }
 
     public static boolean testBit(byte value, int bit) {
