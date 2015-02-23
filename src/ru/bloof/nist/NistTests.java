@@ -309,18 +309,12 @@ public class NistTests {
                 ones[blockNumber]++;
             }
         }
-        out.println("Ones in blocks:");
-        for (int i = 0; i < ones.length; i++) {
-            out.print(i + ":" + ones[i] + " ");
-        }
-        out.println();
-        ;
         double chi_sq = 0;
         for (int i = 0; i < blocksCount; i++) {
             chi_sq += FastMath.pow(1. * ones[i] / bitsInBlock - 0.5, 2);
         }
         chi_sq *= 4 * bitsInBlock;
-        out.print("\\chi^2: " + chi_sq);
+        out.println("\\chi^2: " + chi_sq);
         double p = Gamma.regularizedGammaQ(blocksCount / 2., chi_sq / 2);
         out.println("p-value: " + p);
         out.println(p > 0.01 ? "Frequency block test passed" : "Frequency block test failed");
